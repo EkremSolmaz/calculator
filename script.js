@@ -4,6 +4,12 @@ const operator_priority = {
   "*": 2,
   "/": 2,
 };
+const operatorMap = {
+  "+": (n1, n2) => n1 + n2,
+  "-": (n1, n2) => n1 - n2,
+  "*": (n1, n2) => n1 * n2,
+  "/": (n1, n2) => n1 / n2,
+};
 
 const isOperator = (c) => "/*-+".includes(c);
 const isNumber = (c) => !isNaN(c);
@@ -62,7 +68,7 @@ function areDecimalsValid() {
   });
 }
 
-function isOperationValid() {
+function isValid() {
   const errorDisplay = document.getElementById("error_display");
   let result = true;
   let errorText = "";
@@ -89,48 +95,85 @@ function isOperationValid() {
 
 let current_text = "";
 
-const operator_stack = [];
-const postfix_stack = [];
+const operatorStack = [];
+const postfixStack = [];
+const solveStack = [];
 
 function calculatePostfix() {
-  postfix_stack.splice(0); // empty postfix stack
+  postfixStack.splice(0); // empty postfix stack
   const items = getItemsFromText(current_text);
   items.forEach((item) => {
     if (item === "(") {
-      operator_stack.push("(");
+      operatorStack.push("(");
     } else if (item === ")") {
-      while (operator_stack.length > 0) {
-        const lastItem = operator_stack.pop();
+      while (operatorStack.length > 0) {
+        const lastItem = operatorStack.pop();
         if (lastItem === "(") break;
-        postfix_stack.push(lastItem);
+        postfixStack.push(lastItem);
       }
     } else if (isOperator(item)) {
-      while (operator_stack.length > 0) {
-        const lastItem = operator_stack[operator_stack.length - 1];
+      while (operatorStack.length > 0) {
+        const lastItem = operatorStack[operatorStack.length - 1];
         if (
           isOperator(lastItem) &&
           operator_priority[lastItem] >= operator_priority[item]
         ) {
-          postfix_stack.push(lastItem);
-          operator_stack.pop();
+          postfixStack.push(lastItem);
+          operatorStack.pop();
         } else {
           break;
         }
       }
-      operator_stack.push(item);
+      operatorStack.push(item);
     } else if (isNumber(item)) {
       const numValue = parseFloat(item);
-      postfix_stack.push(numValue);
+      postfixStack.push(numValue);
     }
   });
-  while (operator_stack.length > 0) {
-    postfix_stack.push(operator_stack.pop());
+  while (operatorStack.length > 0) {
+    postfixStack.push(operatorStack.pop());
   }
 }
 
-function handleDisplay() {
+function solvePostfix() {
+  postfixStack.forEach((item) => {
+    if (isOperator(item)) {
+      if (solveStack.length < 2) {
+        throw new Error("Something went wrong");
+      }
+      const n1 = solveStack.pop();
+      const n2 = solveStack.pop();
+      solveStack.push(operatorMap[item](n2, n1));
+    } else {
+      if (!isNumber(item)) {
+        throw new Error("Something went wrong");
+      }
+      solveStack.push(item);
+    }
+  });
+
+  if (solveStack.length !== 1) {
+    throw new Error("Something went wrong");
+  }
+  current_text = solveStack.pop().toString();
+}
+
+function calculate() {
+  if (!isValid()) {
+    handleDisplay(false);
+    return;
+  }
+
+  calculatePostfix();
+  console.log(postfixStack);
+  solvePostfix();
+
+  handleDisplay(true);
+}
+
+function handleDisplay(isValid) {
   let display = document.getElementById("display");
-  if (isOperationValid()) {
+  if (isValid) {
     display.classList.remove("invalid");
     display.classList.add("valid");
   } else {
@@ -149,15 +192,15 @@ function main() {
       const btnValue = e.currentTarget.value;
 
       if (btnValue === "=") {
-        console.log(postfix_stack);
+        calculate();
+        return;
       } else if (btnValue === "C") {
         current_text = "";
       } else {
         current_text += "" + btnValue;
       }
 
-      calculatePostfix();
-      handleDisplay();
+      handleDisplay(isValid(current_text));
     });
   });
 }
