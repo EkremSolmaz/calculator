@@ -1,0 +1,58 @@
+@font-face {
+  font-family: 'calculator';
+  src: url('digital-7.ttf') format('truetype');
+}
+
+.zero { grid-area: zero; }
+.one { grid-area: one; }
+.two { grid-area: two; }
+.three { grid-area: three; }
+.four { grid-area: four; }
+.five { grid-area: five; }
+.six { grid-area: six; }
+.seven { grid-area: seven; }
+.eight { grid-area: eight; }
+.nine { grid-area: nine; }
+.add { grid-area: add; }
+.subtract { grid-area: subtract; }
+.multiply { grid-area: multiply; }
+.divide { grid-area: divide; }
+.decimal { grid-area: decimal; }
+.clear { grid-area: clear; }
+.calculate { grid-area: calculate; }
+.open { grid-area: open; }
+.close { grid-area: close; }
+
+body{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'calculator', sans-serif;
+}
+.calculator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.calculator__keys{
+  display: grid;grid-template-columns: repeat(4, 1fr);
+  grid-template-areas:
+    'open close add subtract'
+    'seven eight nine multiply'
+    'four five six divide'
+    'one two three clear'
+    'zero zero decimal calculate';
+  gap: 10px;
+  height: 600px;
+  width: 400px;
+}
+
+#display{
+  min-width: 400px;
+  height: 50px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 42px;
+  text-align: right;
+}
